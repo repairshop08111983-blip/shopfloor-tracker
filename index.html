@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ERS Shop floor tracker</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
@@ -11,70 +11,129 @@
       --card: #1e293b;
       --accent: #06b6d4;
       --header: linear-gradient(90deg, #6366f1, #06b6d4);
+      --modal-bg: rgba(15, 23, 42, 0.95);
     }
+    
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
     body {
       font-family: 'Poppins', sans-serif;
       margin: 0;
       background: var(--bg);
       color: #fff;
+      overflow-x: hidden;
     }
+
     header {
-      padding: 20px;
+      padding: 15px;
       text-align: center;
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 600;
       background: var(--header);
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
-    * { box-sizing: border-box; }
-
-    .container { padding: 15px; max-width: 1100px; margin: auto; }
+    .container { padding: 12px; max-width: 1100px; margin: auto; }
     
     .top-actions {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
+      padding: 0 5px;
     }
 
-    /* Mobile First Form Layout */
+    .top-actions h3 { font-size: 18px; }
+
+    /* Modal Styling */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--modal-bg);
+      z-index: 1001;
+      justify-content: center;
+      align-items: flex-end; /* Slide up from bottom on mobile */
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-content {
+      background: var(--card);
+      width: 100%;
+      max-width: 500px;
+      padding: 25px;
+      border-radius: 20px 20px 0 0; /* Rounded top for mobile drawer feel */
+      box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
+      border: 1px solid #334155;
+      position: relative;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    /* Desktop adjustment for modal */
+    @media (min-width: 768px) {
+      .modal-overlay { align-items: center; padding: 20px; }
+      .modal-content { border-radius: 16px; animation: fadeIn 0.3s ease-out; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .close-btn {
+      background: #334155;
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Form Layout inside Modal */
     .form {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      margin-bottom: 25px;
-      background: var(--card);
-      padding: 15px;
-      border-radius: 12px;
-    }
-
-    /* Desktop Form Adjustment */
-    @media (min-width: 768px) {
-      .form {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        padding: 20px;
-      }
+      gap: 15px;
     }
 
     input, select, button {
-      padding: 12px;
-      border-radius: 8px;
+      padding: 14px; /* Larger tap targets */
+      border-radius: 10px;
       border: 1px solid #334155;
       background: #0f172a;
       color: white;
       outline: none;
       width: 100%;
       font-family: inherit;
+      font-size: 16px; /* Prevents iOS auto-zoom on focus */
     }
+    
     input:focus, select:focus { border-color: var(--accent); }
     
-    button {
+    .btn-primary {
       background: var(--accent);
       color: white;
       cursor: pointer;
@@ -85,40 +144,66 @@
       align-items: center;
       justify-content: center;
       gap: 5px;
-      padding: 14px; /* Slightly larger tap target on mobile */
     }
-    button:hover { opacity: 0.9; transform: translateY(-1px); }
-    button:active { transform: translateY(0); }
-    button:disabled { background: #475569; cursor: not-allowed; }
 
+    .btn-add-main {
+      width: auto;
+      padding: 8px 16px;
+      font-size: 13px;
+    }
+
+    /* Table Container & Mobile Handling */
     .table-container { 
       overflow-x: auto; 
-      border-radius: 10px; 
+      border-radius: 12px; 
       box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
-      -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+      -webkit-overflow-scrolling: touch;
+      background: var(--card);
     }
+    
     table {
       width: 100%;
       border-collapse: collapse;
-      background: var(--card);
-      min-width: 600px; /* Ensures columns don't squish too much on phones */
+      min-width: 800px; /* Force scroll on mobile to keep data readable */
     }
-    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #334155; font-size: 13px; }
-    th { background: #334155; color: #94a3b8; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+    
+    th, td { padding: 14px; text-align: left; border-bottom: 1px solid #334155; font-size: 13px; }
+    th { background: #334155; color: #94a3b8; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; position: sticky; top: 0; }
     
     .status-pill {
-      padding: 4px 10px;
-      border-radius: 20px;
+      padding: 5px 10px;
+      border-radius: 8px;
       font-size: 11px;
-      background: #334155;
+      background: #0f172a;
       border: 1px solid #475569;
       white-space: nowrap;
+      font-weight: 600;
+      color: var(--accent);
     }
-    .btn-delete { background: #ef4444; padding: 8px 12px; font-size: 11px; width: auto; }
+    
+    .btn-delete { 
+      background: rgba(239, 68, 68, 0.1); 
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      padding: 6px 10px; 
+      font-size: 11px; 
+      width: auto; 
+    }
 
-    /* Overlays */
-    .loading-overlay { text-align: center; padding: 20px; color: var(--accent); display: none; font-weight: 600; }
-    .error-msg { color: #f87171; text-align: center; padding: 10px; display: none; margin-bottom: 10px; background: #451a1a; border-radius: 8px; }
+    .loading-overlay { text-align: center; padding: 20px; color: var(--accent); display: none; font-weight: 600; font-size: 14px; }
+    .error-msg { color: #f87171; text-align: center; padding: 12px; display: none; margin-bottom: 10px; background: #451a1a; border-radius: 10px; font-size: 13px; }
+    
+    label { font-size: 12px; color: #94a3b8; margin-bottom: -10px; display: block; font-weight: 600; }
+
+    /* Add a hint for scrolling on mobile */
+    .scroll-hint {
+        text-align: center;
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 8px;
+        display: block;
+    }
+    @media (min-width: 768px) { .scroll-hint { display: none; } }
   </style>
 </head>
 <body>
@@ -129,49 +214,92 @@
   <div id="errorDisplay" class="error-msg"></div>
 
   <div class="top-actions">
-    <h3 style="margin:0">Active Jobs</h3>
+    <h3 style="margin:0">Job List</h3>
+    <button class="btn-primary btn-add-main" onclick="openModal()">+ Add Job</button>
   </div>
 
-  <div class="form">
-    <input id="jobName" placeholder="Job Name">
-    <input id="wo" placeholder="Work Order">
-    <select id="location">
-      <option value="Workstation 1">Workstation 1</option>
-      <option value="Workstation 2">Workstation 2</option>
-      <option value="Workstation 3">Workstation 3</option>
-      <option value="Workstation 4">Workstation 4</option>
-      <option value="Workstation 5">Workstation 5</option>
-      <option value="Workstation 6">Workstation 6</option>
-      <option value="Workstation 7">Workstation 7</option>
-      <option value="Workstation 8">Workstation 8</option>
-    </select>
-    <input id="status" placeholder="Status...">
-    <input id="date" type="date">
-    <button id="addBtn" onclick="addJob()">Add Job</button>
-  </div>
+  <div id="loading" class="loading-overlay">⌛ Refreshing...</div>
 
-  <div id="loading" class="loading-overlay">⚙️ Updating Shopfloor...</div>
-
+  <!-- Table View -->
   <div class="table-container">
     <table>
       <thead>
         <tr>
-          <th>Job</th>
-          <th>WO</th>
+          <th>Job Name</th>
+          <th>WO Number</th>
           <th>Location</th>
           <th>Status</th>
-          <th>Date</th>
+          <th>Start Date</th>
           <th>Action</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
   </div>
+  <span class="scroll-hint">Swipe left/right to view all columns →</span>
+</div>
+
+<!-- Modal Popup for adding jobs -->
+<div id="jobModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 style="margin:0; font-size: 18px;">New Job Entry</h2>
+      <button class="close-btn" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="form">
+      <div>
+        <label>Job Title</label>
+        <input id="jobName" placeholder="Enter job name" autocomplete="off">
+      </div>
+      <div>
+        <label>Work Order</label>
+        <input id="wo" placeholder="Enter WO number" autocomplete="off">
+      </div>
+      <div>
+        <label>Workstation</label>
+        <select id="location">
+          <option value="Workstation 1">Workstation 1</option>
+          <option value="Workstation 2">Workstation 2</option>
+          <option value="Workstation 3">Workstation 3</option>
+          <option value="Workstation 4">Workstation 4</option>
+          <option value="Workstation 5">Workstation 5</option>
+          <option value="Workstation 6">Workstation 6</option>
+          <option value="Workstation 7">Workstation 7</option>
+          <option value="Workstation 8">Workstation 8</option>
+        </select>
+      </div>
+      <div>
+        <label>Current Status</label>
+        <input id="status" placeholder="e.g. In Progress">
+      </div>
+      <div>
+        <label>Start Date</label>
+        <input id="date" type="date">
+      </div>
+      <button id="addBtn" class="btn-primary" onclick="addJob()" style="margin-top: 5px;">Save Entry</button>
+    </div>
+  </div>
 </div>
 
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycbz6JGqKSpnPegAraDGKd0kF1k5MH5kgIpu79OIrQ1CVZTSoJZ8z71nMwm6RXe19kuefPg/exec";
   let currentJobs = [];
+
+  function openModal() {
+    document.getElementById('jobModal').style.display = 'flex';
+    document.getElementById('date').valueAsDate = new Date();
+    document.body.style.overflow = 'hidden'; // Prevent background scroll
+  }
+
+  function closeModal() {
+    document.getElementById('jobModal').style.display = 'none';
+    document.body.style.overflow = 'auto'; 
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById('jobModal');
+    if (event.target == modal) closeModal();
+  }
 
   const showLoading = (show) => {
     document.getElementById('loading').style.display = show ? 'block' : 'none';
@@ -203,11 +331,11 @@
       currentJobs.forEach((job, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${job.jobName || ''}</td>
+          <td style="font-weight: 600; color: #f8fafc;">${job.jobName || ''}</td>
           <td>${job.wo || ''}</td>
           <td>${job.location || ''}</td>
           <td><span class="status-pill">${job.status || 'N/A'}</span></td>
-          <td>${job.date ? new Date(job.date).toLocaleDateString() : ''}</td>
+          <td style="color: #94a3b8;">${job.date ? new Date(job.date).toLocaleDateString() : ''}</td>
           <td>
             <button class="btn-delete" onclick="deleteJob(${index})">Delete</button>
           </td>
@@ -231,7 +359,10 @@
       date: document.getElementById('date').value
     };
 
-    if(!job.jobName || !job.wo) return;
+    if(!job.jobName || !job.wo) {
+      showError("Please fill in Job Name and WO.");
+      return;
+    }
 
     showLoading(true);
     try {
@@ -240,9 +371,12 @@
         mode: "no-cors", 
         body: JSON.stringify(job)
       });
+      
       document.getElementById('jobName').value = '';
       document.getElementById('wo').value = '';
       document.getElementById('status').value = '';
+      
+      closeModal();
       setTimeout(fetchJobs, 1500);
     } catch (e) {
       showError("Failed to add job.");
@@ -251,6 +385,8 @@
   }
 
   async function deleteJob(index) {
+    if(!confirm("Delete this record?")) return;
+    
     showLoading(true);
     try {
       await fetch(API_URL, {
