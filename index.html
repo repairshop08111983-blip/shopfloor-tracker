@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopfloor Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: #0f172a;
+      color: #fff;
+    }
+    header {
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 600;
+      background: linear-gradient(90deg, #6366f1, #06b6d4);
+    }
+    .container {
+      padding: 20px;
+    }
+    .form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input, select, button {
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+    }
+    button {
+      background: #06b6d4;
+      color: white;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #1e293b;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background: #334155;
+    }
+    tr:nth-child(even) {
+      background: #0f172a;
+    }
+    .status {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+    .actions button {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<header>Shopfloor Tracker</header>
+
+<div class="container">
+  <div class="form">
+    <input id="jobName" placeholder="Job Name">
+    <input id="wo" placeholder="Work Order">
+    <select id="location">
+      <option>Workstation 1</option>
+      <option>Workstation 2</option>
+      <option>Workstation 3</option>
+      <option>Workstation 4</option>
+      <option>Workstation 5</option>
+      <option>Workstation 6</option>
+      <option>Workstation 7</option>
+      <option>Workstation 8</option>
+    </select>
+    <input id="status" placeholder="Status">
+    <input id="date" type="date">
+    <button onclick="addJob()">Add Job</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Job</th>
+        <th>WO</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbziVJ5wgta4rHNL0I1Dsq-eHmTvjncbKYQZsaqGtz1EcR2TfxXGIY-DqP0bdnG5LzNuAQ/exec";
+
+  async function fetchJobs() {
+    const res = await axios.get(API_URL);
+    const data = res.data;
+    const body = document.getElementById('tableBody');
+    body.innerHTML = '';
+    data.forEach((job, index) => {
+      body.innerHTML += `
+        <tr>
+          <td>${job.jobName}</td>
+          <td>${job.wo}</td>
+          <td>${job.location}</td>
+          <td><span class="status">${job.status}</span></td>
+          <td>${job.date}</td>
+          <td class="actions">
+            <button onclick="deleteJob(${index})">Delete</button>
+          </td>
+        </tr>`;
+    });
+  }
+
+  async function addJob() {
+    const job = {
+      jobName: document.getElementById('jobName').value,
+      wo: document.getElementById('wo').value,
+      location: document.getElementById('location').value,
+      status: document.getElementById('status').value,
+      date: document.getElementById('date').value
+    };
+    await axios.post(API_URL, job);
+    fetchJobs();
+  }
+
+  async function deleteJob(index) {
+    await axios.post(API_URL, { delete: index });
+    fetchJobs();
+  }
+
+  fetchJobs();
+</script>
+
+</body>
+</html>
