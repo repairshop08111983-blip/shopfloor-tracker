@@ -1,407 +1,505 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ERS Shop floor tracker</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --accent: #06b6d4;
-      --header: linear-gradient(90deg, #6366f1, #06b6d4);
-      --modal-bg: rgba(15, 23, 42, 0.95);
-    }
-    
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ERS Shop Floor Tracker Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --header: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            --modal-bg: rgba(15, 23, 42, 0.95);
+        }
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      background: var(--bg);
-      color: #fff;
-      overflow-x: hidden;
-    }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    header {
-      padding: 15px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: 600;
-      background: var(--header);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background: var(--bg);
+            color: #fff;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
 
-    .container { padding: 12px; max-width: 1100px; margin: auto; }
-    
-    .top-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      padding: 0 5px;
-    }
+        /* Login Screen */
+        .login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .top-actions h3 { font-size: 18px; }
+        .login-box {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
+            text-align: center;
+        }
 
-    /* Modal Styling */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--modal-bg);
-      z-index: 1001;
-      justify-content: center;
-      align-items: flex-end; /* Slide up from bottom on mobile */
-      backdrop-filter: blur(8px);
-    }
+        .login-box h2 { margin-top: 0; margin-bottom: 20px; color: var(--accent); }
+        .login-box input { margin-bottom: 15px; }
 
-    .modal-content {
-      background: var(--card);
-      width: 100%;
-      max-width: 500px;
-      padding: 25px;
-      border-radius: 20px 20px 0 0; /* Rounded top for mobile drawer feel */
-      box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
-      border: 1px solid #334155;
-      position: relative;
-      animation: slideUp 0.3s ease-out;
-    }
+        .app-header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--header);
+            border-bottom: 1px solid #334155;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
+        .app-header h1 { font-size: 20px; margin: 0; font-weight: 600; }
+        
+        .btn-logout {
+            background: transparent;
+            border: 1px solid #64748b;
+            color: #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-logout:hover { background: #334155; color: #fff; }
 
-    /* Desktop adjustment for modal */
-    @media (min-width: 768px) {
-      .modal-overlay { align-items: center; padding: 20px; }
-      .modal-content { border-radius: 16px; animation: fadeIn 0.3s ease-out; }
-    }
+        .container { padding: 16px; max-width: 1200px; margin: auto; display: block; }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
+        /* Search & Filter Bar */
+        .controls-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
 
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
+        .search-box { position: relative; width: 100%; }
+        .search-box input { padding-left: 40px; background: var(--card); border: 1px solid #334155; }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; }
 
-    .close-btn {
-      background: #334155;
-      border: none;
-      color: #fff;
-      font-size: 20px;
-      cursor: pointer;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        /* Modal Styling */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--modal-bg);
+            z-index: 1001;
+            justify-content: center;
+            align-items: flex-end;
+            backdrop-filter: blur(10px);
+        }
 
-    /* Form Layout inside Modal */
-    .form {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+        .modal-content {
+            background: var(--card);
+            width: 100%;
+            max-width: 500px;
+            padding: 24px;
+            border-radius: 24px 24px 0 0;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+            border: 1px solid #334155;
+            position: relative;
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-    input, select, button {
-      padding: 14px; /* Larger tap targets */
-      border-radius: 10px;
-      border: 1px solid #334155;
-      background: #0f172a;
-      color: white;
-      outline: none;
-      width: 100%;
-      font-family: inherit;
-      font-size: 16px; /* Prevents iOS auto-zoom on focus */
-    }
-    
-    input:focus, select:focus { border-color: var(--accent); }
-    
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-    }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-    .btn-add-main {
-      width: auto;
-      padding: 8px 16px;
-      font-size: 13px;
-    }
+        @media (min-width: 768px) {
+            .modal-overlay { align-items: center; padding: 20px; }
+            .modal-content { border-radius: 20px; animation: fadeIn 0.2s ease-out; }
+            .controls-row { grid-template-columns: 1fr 200px auto; }
+        }
 
-    /* Table Container & Mobile Handling */
-    .table-container { 
-      overflow-x: auto; 
-      border-radius: 12px; 
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
-      -webkit-overflow-scrolling: touch;
-      background: var(--card);
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 800px; /* Force scroll on mobile to keep data readable */
-    }
-    
-    th, td { padding: 14px; text-align: left; border-bottom: 1px solid #334155; font-size: 13px; }
-    th { background: #334155; color: #94a3b8; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; position: sticky; top: 0; }
-    
-    .status-pill {
-      padding: 5px 10px;
-      border-radius: 8px;
-      font-size: 11px;
-      background: #0f172a;
-      border: 1px solid #475569;
-      white-space: nowrap;
-      font-weight: 600;
-      color: var(--accent);
-    }
-    
-    .btn-delete { 
-      background: rgba(239, 68, 68, 0.1); 
-      color: #ef4444;
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      padding: 6px 10px; 
-      font-size: 11px; 
-      width: auto; 
-    }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-    .loading-overlay { text-align: center; padding: 20px; color: var(--accent); display: none; font-weight: 600; font-size: 14px; }
-    .error-msg { color: #f87171; text-align: center; padding: 12px; display: none; margin-bottom: 10px; background: #451a1a; border-radius: 10px; font-size: 13px; }
-    
-    label { font-size: 13px; color: #94a3b8;display: block; font-weight: 600; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 
-    /* Add a hint for scrolling on mobile */
-    .scroll-hint {
-        text-align: center;
-        font-size: 11px;
-        color: #64748b;
-        margin-top: 8px;
-        display: block;
-    }
-    @media (min-width: 768px) { .scroll-hint { display: none; } }
-  </style>
+        .close-btn {
+            background: #334155; border: none; color: #fff; font-size: 24px;
+            cursor: pointer; width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .form-grid { display: grid; gap: 16px; }
+
+        input, select, button {
+            padding: 14px; border-radius: 12px; border: 1px solid #334155;
+            background: #0f172a; color: white; outline: none; width: 100%;
+            font-family: inherit; font-size: 16px; transition: all 0.2s;
+        }
+
+        input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2); }
+
+        .btn-primary {
+            background: var(--accent); color: white; cursor: pointer;
+            font-weight: 600; border: none; display: flex;
+            align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-primary:active { transform: scale(0.98); }
+
+        /* Table Design */
+        .table-container {
+            overflow-x: auto; border-radius: 16px; background: var(--card);
+            border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+
+        th {
+            background: #1e293b; color: #94a3b8; text-align: left; padding: 16px;
+            font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+            border-bottom: 2px solid #334155; position: sticky; top: 0;
+        }
+
+        td { padding: 16px; border-bottom: 1px solid #334155; font-size: 14px; }
+
+        /* Status Colors */
+        .status-pill {
+            padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
+            display: inline-block; background: rgba(148, 163, 184, 0.1); color: #94a3b8;
+        }
+
+        .status-completed { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .status-progress { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .status-blocked { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+        .actions-cell { display: flex; gap: 8px; }
+
+        .btn-icon {
+            width: 34px; height: 34px; padding: 0; display: flex;
+            align-items: center; justify-content: center; font-size: 14px; background: #334155;
+            cursor: pointer; border: 1px solid transparent; border-radius: 8px;
+        }
+
+        .btn-edit { color: var(--accent); border-color: rgba(6, 182, 212, 0.3); }
+        .btn-delete { color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
+
+        .loading-overlay { 
+            position: fixed; top: 100px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); color: white; padding: 8px 20px;
+            border-radius: 30px; font-weight: 600; display: none; z-index: 1000;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+        }
+
+        .error-msg { 
+            background: #451a1a; color: #f87171; padding: 12px; border-radius: 12px;
+            margin-bottom: 16px; display: none; text-align: center; border: 1px solid #7f1d1d;
+        }
+
+        label { font-size: 12px; color: #94a3b8; margin-bottom: 4px; display: block; margin-left: 4px; }
+        .scroll-hint { text-align: center; color: #64748b; font-size: 11px; margin-top: 12px; }
+        
+        /* Hide elements based on role */
+        .admin-only { display: none; }
+        
+        @media (min-width: 768px) { .scroll-hint { display: none; } }
+    </style>
 </head>
 <body>
 
-<header>🏭 ERS Shop floor tracker</header>
-
-<div class="container">
-  <div id="errorDisplay" class="error-msg"></div>
-
-  <div class="top-actions">
-    <h3 style="margin:0">Job List</h3>
-    <button class="btn-primary btn-add-main" onclick="openModal()">+ Add Job</button>
-  </div>
-
-  <div id="loading" class="loading-overlay">⌛ Refreshing...</div>
-
-  <!-- Table View -->
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Job Name</th>
-          <th>WO Number</th>
-          <th>Location</th>
-          <th>Status</th>
-          <th>Start Date</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
-  <span class="scroll-hint">Swipe left/right to view all columns →</span>
+<!-- Login Screen -->
+<div id="loginScreen" class="login-overlay" style="display: none;">
+    <div class="login-box">
+        <h2>Admin Login</h2>
+        <input type="text" id="username" placeholder="Username" autocomplete="off">
+        <input type="password" id="password" placeholder="Password">
+        <button class="btn-primary" onclick="handleLogin()">Login</button>
+        <button class="btn-logout" onclick="closeLoginModal()" style="margin-top:10px; width:100%; justify-content:center; display:flex;">Cancel</button>
+        <div id="loginError" class="error-msg" style="margin-top: 15px;"></div>
+    </div>
 </div>
 
-<!-- Modal Popup for adding jobs -->
-<div id="jobModal" class="modal-overlay">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2 style="margin:0; font-size: 18px;">New Job Entry</h2>
-      <button class="close-btn" onclick="closeModal()">&times;</button>
-    </div>
-    <div class="form">
-      <div>
-        <label>Job Title</label>
-        <input id="jobName" placeholder="Enter job name" autocomplete="off">
-      </div>
-      <div>
-        <label>Work Order</label>
-        <input id="wo" placeholder="Enter WO number" autocomplete="off">
-      </div>
-      <div>
-        <label>Workstation</label>
-        <select id="location">
-          <option value="Workstation 1">Workstation 1</option>
-          <option value="Workstation 2">Workstation 2</option>
-          <option value="Workstation 3">Workstation 3</option>
-          <option value="Workstation 4">Workstation 4</option>
-          <option value="Workstation 5">Workstation 5</option>
-          <option value="Workstation 6">Workstation 6</option>
-          <option value="Workstation 7">Workstation 7</option>
-          <option value="Workstation 8">Workstation 8</option>
+<div id="appHeader" class="app-header">
+    <h1>🏭 ERS Tracker <span id="roleBadge" style="font-size:12px; font-weight:300; color:var(--accent); margin-left:10px;">[View Only]</span></h1>
+    <button id="authBtn" class="btn-logout" onclick="openLoginModal()">Admin Login</button>
+</div>
+
+<div class="container" id="mainContainer">
+    <div id="errorDisplay" class="error-msg"></div>
+
+    <div class="controls-row" id="controlsRow">
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search by Job or WO..." oninput="renderTable()">
+        </div>
+        <select id="stationFilter" onchange="renderTable()">
+            <option value="">All Stations</option>
+            <option value="Workstation 1">Workstation 1</option>
+            <option value="Workstation 2">Workstation 2</option>
+            <option value="Workstation 3">Workstation 3</option>
+            <option value="Workstation 4">Workstation 4</option>
+            <option value="Workstation 5">Workstation 5</option>
+            <option value="Workstation 6">Workstation 6</option>
+            <option value="Workstation 7">Workstation 7</option>
+            <option value="Workstation 8">Workstation 8</option>
         </select>
-      </div>
-      <div>
-        <label>Current Status</label>
-        <input id="status" placeholder="e.g. In Progress">
-      </div>
-      <div>
-        <label>Start Date</label>
-        <input id="date" type="date">
-      </div>
-      <button id="addBtn" class="btn-primary" onclick="addJob()" style="margin-top: 5px;">Save Entry</button>
+        <button class="btn-primary admin-only" id="addBtnMain" onclick="openModal()">+ New Job</button>
     </div>
-  </div>
+
+    <div id="loading" class="loading-overlay">Syncing...</div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Job Name</th>
+                    <th>WO Number</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th>Start Date</th>
+                    <th class="admin-only" id="thActions">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+    <div class="scroll-hint">← Swipe to see details →</div>
+</div>
+
+<div id="jobModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle" style="margin:0; font-size: 18px;">New Job Entry</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="form-grid">
+            <!-- Changed editIndex to editRowId to match Apps Script -->
+            <input type="hidden" id="editRowId" value="-1">
+            <div>
+                <label>Job Title</label>
+                <input id="jobName" placeholder="Enter job name">
+            </div>
+            <div>
+                <label>Work Order</label>
+                <input id="wo" placeholder="Enter WO number">
+            </div>
+            <div>
+                <label>Workstation</label>
+                <select id="location">
+                    <option value="Workstation 1">Workstation 1</option>
+                    <option value="Workstation 2">Workstation 2</option>
+                    <option value="Workstation 3">Workstation 3</option>
+                    <option value="Workstation 4">Workstation 4</option>
+                    <option value="Workstation 5">Workstation 5</option>
+                    <option value="Workstation 6">Workstation 6</option>
+                    <option value="Workstation 7">Workstation 7</option>
+                    <option value="Workstation 8">Workstation 8</option>
+                </select>
+            </div>
+            <div>
+                <label>Current Status</label>
+                <input id="status" placeholder="Enter status">
+            </div>
+            <div>
+                <label>Start Date</label>
+                <input id="date" type="date">
+            </div>
+            <button id="addBtn" class="btn-primary" onclick="saveJob()" style="margin-top: 8px;">
+                <span id="saveLabel">Save Entry</span>
+            </button>
+        </div>
+    </div>
 </div>
 
 <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbz6JGqKSpnPegAraDGKd0kF1k5MH5kgIpu79OIrQ1CVZTSoJZ8z71nMwm6RXe19kuefPg/exec";
-  let currentJobs = [];
-
-  function openModal() {
-    document.getElementById('jobModal').style.display = 'flex';
-    document.getElementById('date').valueAsDate = new Date();
-    document.body.style.overflow = 'hidden'; // Prevent background scroll
-  }
-
-  function closeModal() {
-    document.getElementById('jobModal').style.display = 'none';
-    document.body.style.overflow = 'auto'; 
-  }
-
-  window.onclick = function(event) {
-    const modal = document.getElementById('jobModal');
-    if (event.target == modal) closeModal();
-  }
-
-  const showLoading = (show) => {
-    document.getElementById('loading').style.display = show ? 'block' : 'none';
-    document.getElementById('addBtn').disabled = show;
-  };
-
-  const showError = (msg) => {
-    const errDiv = document.getElementById('errorDisplay');
-    if (msg) {
-      errDiv.textContent = msg;
-      errDiv.style.display = 'block';
-      setTimeout(() => errDiv.style.display = 'none', 5000);
-    } else {
-      errDiv.style.display = 'none';
-    }
-  };
-
-  async function fetchJobs() {
-    showError(null);
-    try {
-      showLoading(true);
-      const response = await fetch(`${API_URL}?t=${Date.now()}`);
-      if (!response.ok) throw new Error("Server error");
-      
-      currentJobs = await response.json();
-      const body = document.getElementById('tableBody');
-      body.innerHTML = '';
-      
-      currentJobs.forEach((job, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td style="font-weight: 600; color: #f8fafc;">${job.jobName || ''}</td>
-          <td>${job.wo || ''}</td>
-          <td>${job.location || ''}</td>
-          <td><span class="status-pill">${job.status || 'N/A'}</span></td>
-          <td style="color: #94a3b8;">${job.date ? new Date(job.date).toLocaleDateString() : ''}</td>
-          <td>
-            <button class="btn-delete" onclick="deleteJob(${index})">Delete</button>
-          </td>
-        `;
-        body.appendChild(row);
-      });
-    } catch (err) {
-      showError("Connection failed. Check your API URL.");
-    } finally {
-      showLoading(false);
-    }
-  }
-
-  async function addJob() {
-    const job = {
-      action: 'add',
-      jobName: document.getElementById('jobName').value,
-      wo: document.getElementById('wo').value,
-      location: document.getElementById('location').value,
-      status: document.getElementById('status').value,
-      date: document.getElementById('date').value
-    };
-
-    if(!job.jobName || !job.wo) {
-      showError("Please fill in Job Name and WO.");
-      return;
-    }
-
-    showLoading(true);
-    try {
-      await fetch(API_URL, {
-        method: "POST",
-        mode: "no-cors", 
-        body: JSON.stringify(job)
-      });
-      
-      document.getElementById('jobName').value = '';
-      document.getElementById('wo').value = '';
-      document.getElementById('status').value = '';
-      
-      closeModal();
-      setTimeout(fetchJobs, 1500);
-    } catch (e) {
-      showError("Failed to add job.");
-      showLoading(false);
-    }
-  }
-
-  async function deleteJob(index) {
-    if(!confirm("Delete this record?")) return;
+    // CRITICAL: Ensure this is your latest DEPLOYMENT URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbwBtqrsLAFdOAlZheGGHLFJDO80O23MHq-PItzUNb1BL7-DRQ4gQSdtxlX0VIrRZKZc7g/exec";
     
-    showLoading(true);
-    try {
-      await fetch(API_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify({ action: 'delete', index: index })
-      });
-      setTimeout(fetchJobs, 1500);
-    } catch (e) {
-      showLoading(false);
+    let allJobs = [];
+    let currentUserRole = 'user';
+
+    window.onload = () => { initializeApp(); };
+
+    function openLoginModal() { document.getElementById('loginScreen').style.display = 'flex'; }
+    function closeLoginModal() { 
+        document.getElementById('loginScreen').style.display = 'none'; 
+        document.getElementById('loginError').style.display = 'none';
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
     }
-  }
 
-  window.onload = fetchJobs;
+    function handleLogin() {
+        const u = document.getElementById('username').value.trim().toLowerCase();
+        const p = document.getElementById('password').value;
+        if (u === 'admin' && p === 'admin123') {
+            currentUserRole = 'admin';
+            closeLoginModal();
+            initializeApp();
+        } else {
+            const err = document.getElementById('loginError');
+            err.textContent = "Invalid credentials!";
+            err.style.display = 'block';
+        }
+    }
+
+    function logout() { currentUserRole = 'user'; initializeApp(); }
+
+    function initializeApp() {
+        const roleBadge = document.getElementById('roleBadge');
+        const adminElements = document.querySelectorAll('.admin-only');
+        const authBtn = document.getElementById('authBtn');
+        
+        if (currentUserRole === 'admin') {
+            roleBadge.textContent = "[Admin Mode]";
+            authBtn.textContent = "Logout";
+            authBtn.onclick = logout;
+            adminElements.forEach(el => el.style.display = (el.tagName === 'TH' || el.tagName === 'TD' ? 'table-cell' : 'flex'));
+        } else {
+            roleBadge.textContent = "[View Only]";
+            authBtn.textContent = "Admin Login";
+            authBtn.onclick = openLoginModal;
+            adminElements.forEach(el => el.style.display = 'none');
+        }
+        fetchJobs();
+    }
+
+    async function fetchJobs() {
+        showLoading(true);
+        try {
+            const response = await fetch(`${API_URL}?t=${Date.now()}`);
+            allJobs = await response.json();
+            renderTable();
+        } catch (err) { showError("Connect error."); }
+        finally { showLoading(false); }
+    }
+
+    function renderTable() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const station = document.getElementById('stationFilter').value;
+        const body = document.getElementById('tableBody');
+        body.innerHTML = '';
+
+        allJobs.forEach((job) => {
+            const matchesSearch = (job.jobName||'').toLowerCase().includes(term) || (job.wo||'').toString().includes(term);
+            const matchesStation = !station || job.location === station;
+            
+            if (matchesSearch && matchesStation) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="font-weight: 600;">${job.jobName || ''}</td>
+                    <td>${job.wo || ''}</td>
+                    <td>${job.location || ''}</td>
+                    <td><span class="status-pill ${getStatusClass(job.status)}">${job.status || ''}</span></td>
+                    <td>${job.date ? new Date(job.date).toLocaleDateString() : ''}</td>
+                    ${currentUserRole === 'admin' ? `
+                    <td>
+                        <div class="actions-cell">
+                            <button class="btn-icon btn-edit" onclick="openEditModalByRowId(${job.rowId})">✎</button>
+                            <button class="btn-icon btn-delete" onclick="deleteJobByRowId(${job.rowId})">🗑</button>
+                        </div>
+                    </td>` : ''}
+                `;
+                body.appendChild(row);
+            }
+        });
+    }
+
+    function openModal() {
+        document.getElementById('jobModal').style.display = 'flex';
+        document.getElementById('editRowId').value = "-1";
+        document.getElementById('jobName').value = '';
+        document.getElementById('wo').value = '';
+        document.getElementById('location').value = 'Workstation 1';
+        document.getElementById('status').value = '';
+        document.getElementById('date').valueAsDate = new Date();
+        document.getElementById('modalTitle').innerText = "New Job";
+        document.getElementById('saveLabel').innerText = "Save";
+    }
+
+    // New function that opens modal specific to rowId
+    function openEditModalByRowId(rowId) {
+        const job = allJobs.find(j => j.rowId === rowId);
+        if (!job) return;
+
+        document.getElementById('jobModal').style.display = 'flex';
+        document.getElementById('editRowId').value = rowId;
+        document.getElementById('jobName').value = job.jobName || '';
+        document.getElementById('wo').value = job.wo || '';
+        document.getElementById('location').value = job.location || 'Workstation 1';
+        document.getElementById('status').value = job.status || '';
+        if(job.date) {
+            const d = new Date(job.date);
+            document.getElementById('date').value = d.toISOString().split('T')[0];
+        }
+        document.getElementById('modalTitle').innerText = "Edit Job";
+        document.getElementById('saveLabel').innerText = "Update";
+    }
+
+    function closeModal() { document.getElementById('jobModal').style.display = 'none'; }
+
+    async function saveJob() {
+        const rowId = document.getElementById('editRowId').value;
+        const data = {
+            action: rowId !== "-1" ? 'edit' : 'add',
+            rowId: rowId, // Passing rowId to backend instead of 'index'
+            jobName: document.getElementById('jobName').value,
+            wo: document.getElementById('wo').value,
+            location: document.getElementById('location').value,
+            status: document.getElementById('status').value,
+            date: document.getElementById('date').value
+        };
+
+        if(!data.jobName || !data.wo) {
+            showError("Name and WO are required.");
+            return;
+        }
+
+        showLoading(true);
+        try {
+            await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(data)
+            });
+            closeModal();
+            setTimeout(fetchJobs, 1000);
+        } catch (e) { showError("Save failed."); showLoading(false); }
+    }
+
+    async function deleteJobByRowId(rowId) {
+        if (!confirm("Delete this job permanently?")) return;
+        showLoading(true);
+        try {
+            await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                // Passing rowId directly for accurate deletion
+                body: JSON.stringify({ action: 'delete', rowId: rowId })
+            });
+            setTimeout(fetchJobs, 1000);
+        } catch (e) { showError("Delete failed."); showLoading(false); }
+    }
+
+    function getStatusClass(s) {
+        const v = (s || '').toLowerCase();
+        if (v.includes('comp')) return 'status-completed';
+        if (v.includes('prog') || v.includes('active') || v.includes('work')) return 'status-progress';
+        if (v.includes('hold') || v.includes('block') || v.includes('wait')) return 'status-blocked';
+        return '';
+    }
+
+    function showLoading(s) { document.getElementById('loading').style.display = s ? 'block' : 'none'; }
+    function showError(m) { 
+        const e = document.getElementById('errorDisplay');
+        e.textContent = m; e.style.display = 'block';
+        setTimeout(() => e.style.display = 'none', 4000);
+    }
 </script>
-
 </body>
 </html>
